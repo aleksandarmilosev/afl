@@ -7,7 +7,8 @@ from PIL import Image
 from io import BytesIO
 
 # Configuration
-LOGO_DIR = 'assets/'
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+LOGO_DIR = os.path.join(BASE_DIR, "assets")
 HEADERS = {'User-Agent': 'AFLPremiershipWindowApp (amilosev90@gmail.com)'}
 
 TEAM_LOGO_MAP = {
