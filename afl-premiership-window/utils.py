@@ -44,10 +44,9 @@ def fetch_team_form(season, round_start, round_end, include_finals):
         if isinstance(r, int):
             return r
         if isinstance(r, str):
-            finals = {"QF": 26, "EF": 27, "SF": 28, "PF": 29, "GF": 30}
             if r.lower().startswith("opening"):
                 return 0
-            return finals.get(r)
+            return FINALS_ROUND_MAP.get(r)
         return None
 
     df['round_mapped'] = df['round'].apply(map_round)
@@ -58,7 +57,12 @@ def fetch_team_form(season, round_start, round_end, include_finals):
         records.append({'Team': row['hteam'], 'Date': row['date'], 'PF': row['hscore'], 'PA': row['ascore']})
         records.append({'Team': row['ateam'], 'Date': row['date'], 'PF': row['ascore'], 'PA': row['hscore']})
 
-    df_flat = pd.DataFrame(records).sort_values(['Team', 'Date'], ascending=[True, False])
+    df_flat = pd.DataFrame(records)
+
+    if df_flat.empty:
+        return pd.DataFrame(columns=["Team", "PF_avg", "PA_avg"])
+
+    df_flat = df_flat.sort_values(['Team', 'Date'], ascending=[True, False])
 
     summary = (
         df_flat.groupby('Team')
