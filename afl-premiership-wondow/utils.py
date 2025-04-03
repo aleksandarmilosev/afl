@@ -1,18 +1,14 @@
-import streamlit as st
 import requests
 import pandas as pd
 import matplotlib.pyplot as plt
 from matplotlib.offsetbox import OffsetImage, AnnotationBbox
-import matplotlib.patches as patches
 import os
-from io import BytesIO
 
-# --- CONFIGURATION ---
-LOGO_DIR = 'afl_logos/'
-DEFAULT_YEAR = 2025
-DEFAULT_NUM_GAMES = 5
+# Configuration
+LOGO_DIR = 'assets/'
+HEADERS = {'User-Agent': 'AFLPremiershipWindowApp (amilosev90@gmail.com)'}
 
-team_logo_map = {
+TEAM_LOGO_MAP = {
     "Adelaide": "adelaide.png",
     "Brisbane Lions": "brisbane.png",
     "Carlton": "carlton.png",
@@ -33,47 +29,44 @@ team_logo_map = {
     "Western Bulldogs": "western-bulldogs.png"
 }
 
-headers = {'User-Agent': 'AFLPremiershipWindowApp (amilosev90@gmail.com)'}
+FINALS_ROUND_MAP = {"QF": 26, "EF": 27, "SF": 28, "PF": 29, "GF": 30}
 
-def fetch_year_standings(year):
-    url = f'https://api.squiggle.com.au/?q=standings&year={year}'
-    standings = requests.get(url, headers=headers).json()['standings']
-    df = pd.DataFrame([{
-        'Team': team['name'],
-        'PF': team['for'],
-        'PA': team['against'],
-        'Played': team['played']
-    } for team in standings])
-    df['PF_avg'] = df['PF'] / df['Played']
-    df['PA_avg'] = df['PA'] / df['Played']
-    return df[['Team', 'PF_avg', 'PA_avg']]
 
-def fetch_rolling_form(num_games, current_year):
-    years = [current_year, current_year - 1]
-    games = []
-    for year in years:
-        url = f'https://api.squiggle.com.au/?q=games&year={year}'
-        games += requests.get(url, headers=headers).json()['games']
+def fetch_team_form(season, round_start, round_end, include_finals):
+    url = f'https://api.squiggle.com.au/?q=games&year={season}'
+    games = requests.get(url, headers=HEADERS).json()['games']
 
-    df_games = pd.DataFrame(games)
-    df_games = df_games[df_games['complete'] == 100]
-    df_games['date'] = pd.to_datetime(df_games['date'])
-    df_games = df_games.sort_values('date', ascending=False)
+    df = pd.DataFrame(games)
+    df = df[df['complete'] == 100]
+    df['date'] = pd.to_datetime(df['date'])
+
+    def map_round(r):
+        if isinstance(r, int):
+            return r
+        if isinstance(r, str):
+            finals = {"QF": 26, "EF": 27, "SF": 28, "PF": 29, "GF": 30}
+            if r.lower().startswith("opening"):
+                return 0
+            return finals.get(r)
+        return None
+
+    df['round_mapped'] = df['round'].apply(map_round)
+    df = df[df['round_mapped'].between(round_start, round_end, inclusive='both')]
 
     records = []
-    for _, row in df_games.iterrows():
+    for _, row in df.iterrows():
         records.append({'Team': row['hteam'], 'Date': row['date'], 'PF': row['hscore'], 'PA': row['ascore']})
         records.append({'Team': row['ateam'], 'Date': row['date'], 'PF': row['ascore'], 'PA': row['hscore']})
 
     df_flat = pd.DataFrame(records).sort_values(['Team', 'Date'], ascending=[True, False])
-    recent = (
+
+    summary = (
         df_flat.groupby('Team')
-        .head(num_games)
-        .groupby('Team')
         .agg(PF_avg=('PF', 'mean'), PA_avg=('PA', 'mean'))
         .reset_index()
     )
-    return recent
+    return summary
+
 
 def plot_premiership_matrix(df, title):
     df['PF_rank'] = df['PF_avg'].rank(method='min', ascending=False)
@@ -100,7 +93,7 @@ def plot_premiership_matrix(df, title):
     for _, row in df.iterrows():
         x, y = row['PF_rank'], row['PA_rank']
         team = row['Team']
-        logo_file = team_logo_map.get(team)
+        logo_file = TEAM_LOGO_MAP.get(team)
         if logo_file:
             logo_path = os.path.join(LOGO_DIR, logo_file)
             if os.path.exists(logo_path):
@@ -138,17 +131,4 @@ def plot_premiership_matrix(df, title):
     for spine in ax.spines.values():
         spine.set_visible(False)
 
-    st.pyplot(fig)
-
-# --- STREAMLIT UI ---
-st.title("AFL Premiership Window")
-mode = st.radio("Select Mode", ["Season Ladder", "Rolling Form"])
-
-if mode == "Season Ladder":
-    year = st.selectbox(label="Select Year", index=0, options=["2025", "2024", "2023", "2022", "2021", "2020"], placeholder="2025")
-    df = fetch_year_standings(year)
-    plot_premiership_matrix(df, f"{year} AFL Premiership Window (Ranks Normalised Per Game)")
-else:
-    num_games = st.slider("Number of Recent Games", 3, 15, DEFAULT_NUM_GAMES)
-    df = fetch_rolling_form(num_games, DEFAULT_YEAR)
-    plot_premiership_matrix(df, f"AFL Premiership Window (Last {num_games} Games)")
+    return fig
