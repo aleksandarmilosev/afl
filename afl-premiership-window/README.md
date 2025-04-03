@@ -1,21 +1,16 @@
 # AFL Premiership Window App
 
-This Streamlit app visualizes the **AFL Premiership Window** using data from the [Squiggle API](https://api.squiggle.com.au). It allows you to explore how AFL teams are performing based on points scored and conceded, either by season or by recent form.
+This Streamlit app visualizes the **AFL Premiership Window** using data from the [Squiggle API](https://api.squiggle.com.au). It enables teams' performance comparison based on **points for** and **points against**, normalized per game, over selected rounds of a given season.
 
 ---
 
 ## 📊 Features
 
-- **Season Ladder View**: Uses official ladder data normalized per game.
-- **Rolling Form View**: Shows average performance over the last X games.
-- **Dynamic Quadrant Visualization**:
-  - 🟩 Premiership Window (top-right)
-  - 🟨 Defensive Grinders (top-left)
-  - 🟦 Attacking Risks (bottom-right)
-  - 🟥 Rebuilders (bottom-left)
-- **Team Logos** with visibility-enhancing white halos
-- **Dark Theme** with clean grid and transparency
-- **Download Chart as PNG** directly from the app
+- **Round-by-Round Analysis**: Select any round range (including Opening Round and Finals)
+- **Finals Support**: Optionally include or exclude finals rounds (QF, EF, SF, PF, GF)
+- **Custom Titles and Downloadable Charts**: Auto-updating chart labels and PNG export
+- **Team Logos + Visual Haloing**: Clear logos with circular white backgrounds
+- **Dark Mode Theme**: Clean dark aesthetic with transparent accents
 
 ---
 
@@ -23,56 +18,47 @@ This Streamlit app visualizes the **AFL Premiership Window** using data from the
 
 ```
 afl-premiership-window/
-├── app.py               # Main Streamlit app UI
-├── utils.py             # Data fetching and plotting logic
-├── requirements.txt     # Python dependencies
-├── run_dev.sh           # Dev-mode launcher script
-├── deploy.sh            # Deployment launcher script
-├── .gitignore           # Ignore common build artifacts
+├── app.py               # Main Streamlit app
+├── utils.py             # Data fetching + chart logic
+├── run_dev.sh           # Local dev launcher
+├── deploy.sh            # Production deployment script
+├── requirements.txt     # Dependencies
 ├── .streamlit/
-│   └── config.toml      # Streamlit dark theme configuration
-├── assets/              # Team logo PNGs (used in visualizations)
+│   └── config.toml      # Theme config (optional)
+├── assets/              # Team logo images
 ```
 
 ---
 
-## 🚀 Running the App
+## 🚀 Quick Start
 
-### 📦 1. Clone the Repo
+### 1. Clone the Repo
 ```bash
 git clone https://github.com/aleksandarmilosev/afl-premiership-window.git
 cd afl-premiership-window
 ```
 
-### 🧪 2. Run in Development Mode
-Make the script executable (once only):
+### 2. Run Locally (Dev Mode)
 ```bash
 chmod +x run_dev.sh
-```
-Then run it:
-```bash
 ./run_dev.sh
 ```
-This will:
-- Create a virtual environment (if not already present)
-- Install required dependencies
-- Launch the Streamlit app at `http://localhost:8501`
 
-### ⚙️ 3. Run for Deployment
-Make the script executable (once only):
+### 3. Deploy Script (Minimal)
 ```bash
 chmod +x deploy.sh
-```
-Then run it:
-```bash
 ./deploy.sh
 ```
-This is a minimal version of the above, ideal for CI/CD or hosted deployments.
+
+### 4. View in Browser
+```text
+http://localhost:8501
+```
 
 ---
 
-## 🖼️ PNG Export
-Once the chart is rendered, click the **"Download Chart as PNG"** button to save the visualization.
+## 🖼️ Download Chart
+Use the **Download Chart as PNG** button at the bottom of the app interface.
 
 ---
 
@@ -83,20 +69,29 @@ Once the chart is rendered, click the **"Download Chart as PNG"** button to save
 - Matplotlib
 - Requests
 
-Install manually with:
+Install manually:
 ```bash
 pip install -r requirements.txt
 ```
 
 ---
 
-## ☁️ Future Enhancements
-- Add interactive quadrant filtering
-- Deploy live via Streamlit Cloud
-- Include betting odds / ELO overlays
-- Export CSV of ranked team metrics
+## ✅ Round Support
+| Type             | Label         | Rank |
+|------------------|---------------|------|
+| Opening Round    | `0`           | ✅   |
+| Home & Away      | `1–25`        | ✅   |
+| Finals           | `QF`, `EF`, `SF`, `PF`, `GF` → 26–30 | ✅   |
+
+---
+
+## 💡 Future Ideas
+- Hover tooltips with match context
+- Multi-season comparison overlay
+- Finals-only filtering toggle
+- CSV export of ranked metrics
 
 ---
 
 ## 👤 Author
-Created by [@aleksandarmilosev](mailto:amilosev90@gmail.com).
+Created by [@aleksandarmilosev](mailto:amilosev90@gmail.com). Feedback and PRs welcome!
