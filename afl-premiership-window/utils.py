@@ -101,7 +101,7 @@ def plot_premiership_matrix(df, title):
         if logo_file:
             logo_path = os.path.join(LOGO_DIR, logo_file)
             if os.path.exists(logo_path):
-                circle = plt.Circle((x, y), 0.8, color='white', zorder=1)
+                circle = plt.Circle((x, y), 0.95, color='white', zorder=1)
                 ax.add_patch(circle)
                 img = plt.imread(logo_path)
                 imagebox = OffsetImage(img, zoom=0.07)
