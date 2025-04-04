@@ -3,9 +3,12 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from matplotlib.offsetbox import OffsetImage, AnnotationBbox
 import os
+from PIL import Image
+from io import BytesIO
 
 # Configuration
-LOGO_DIR = 'assets/'
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+LOGO_DIR = os.path.join(BASE_DIR, "assets")
 HEADERS = {'User-Agent': 'AFLPremiershipWindowApp (amilosev90@gmail.com)'}
 
 TEAM_LOGO_MAP = {
@@ -103,10 +106,11 @@ def plot_premiership_matrix(df, title):
             if os.path.exists(logo_path):
                 circle = plt.Circle((x, y), 0.95, color='white', zorder=1)
                 ax.add_patch(circle)
-                img = plt.imread(logo_path)
-                imagebox = OffsetImage(img, zoom=0.07)
-                ab = AnnotationBbox(imagebox, (x, y), frameon=False, zorder=2)
-                ax.add_artist(ab)
+                with open(logo_path, 'rb') as f:
+                    img = Image.open(BytesIO(f.read()))
+                    imagebox = OffsetImage(img, zoom=0.07)
+                    ab = AnnotationBbox(imagebox, (x, y), frameon=False, zorder=2)
+                    ax.add_artist(ab)
             else:
                 ax.text(x, y, team, fontsize=8, ha='center', color='white', zorder=2)
 
