@@ -30,7 +30,7 @@ label_to_value = {v: k for k, v in ROUND_LABELS.items()}
 label_to_value.update({str(i): i for i in range(0, 31)})
 
 # Inputs
-season = st.selectbox("Select Season", list(range(2025, 2015, -1)))
+season = st.selectbox("Select Season", list(range(2026, 2015, -1)))
 include_finals = st.checkbox("Include Finals", value=False)
 
 round_options = ROUND_DISPLAY[:MAX_FINAL_ROUND + 1 if include_finals else MAX_HA_ROUND + 1]
